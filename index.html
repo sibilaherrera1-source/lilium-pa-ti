@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Para ti - Liliums</title>
+    <style>
+        *, *::after, *::before {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --dark-color: #232e4d;
+            --fl-speed: 0.8s;
+            --speed-leaf: 2s;
+            --moonlight-color: rgba(200, 220, 255, 0.15);
+            overflow: hidden;
+        }
+
+        body {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: var(--dark-color);
+            overflow: hidden;
+            perspective: 1000px;
+            font-family: 'Cormorant Garamond', serif;
+        }
+
+        /* --- PANTALLA DE INICIO --- */
+        .start-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, #0a1628 0%, #1a2842 50%, #0f1b2e 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: opacity 0.8s ease-out, visibility 0.8s ease-out;
+            overflow: hidden;
+        }
+
+        .start-screen::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(2px 2px at 20% 30%, white, transparent),
+                radial-gradient(2px 2px at 60% 70%, white, transparent),
+                radial-gradient(1px 1px at 50% 50%, white, transparent);
+            background-size: 200% 200%, 300% 300%, 150% 150%;
+            animation: starfield 20s linear infinite;
+            opacity: 0.4;
+        }
+
+        @keyframes starfield {
+            0% { background-position: 0% 0%, 0% 0%, 0% 0%; }
+            100% { background-position: 50% 50%, 30% 30%, 60% 60%; }
+        }
+
+        .start-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .start-title {
+            position: relative;
+            color: #ffcce0; /* Rosado pálido para el título */
+            font-family: 'Georgia', serif;
+            font-size: clamp(2.5rem, 8vw, 4rem);
+            font-weight: 300;
+            text-align: center;
+            margin-bottom: 4rem;
+            letter-spacing: 0.2em;
+            text-shadow: 
+                0 0 20px rgba(255, 182, 193, 0.8),
+                0 0 40px rgba(255, 105, 180, 0.5),
+                0 2px 4px rgba(0, 0, 0, 0.3);
+            animation: glow-pulse 3s ease-in-out infinite alternate, float-title 3s ease-in-out infinite;
+        }.start-button {
+            position: relative;
+            background: linear-gradient(135deg, #d87093 0%, #ff69b4 50%, #ffb6c1 100%); /* Botón rosa */
+            border: 3px solid rgba(255, 182, 193, 0.3);
+            padding: 1.3rem 3.5rem;
+            font-family: 'Georgia', serif;
+            font-size: 1.3rem;
+            font-weight: 400;
+            color: #fff;
+            border-radius: 50px;
+            cursor: pointer;
+            letter-spacing: 0.15em;
+            box-shadow: 
+                0 10px 40px rgba(219, 112, 147, 0.5),
+                inset 0 2px 0 rgba(255, 255, 255, 0.3),
+                0 0 30px rgba(255, 105, 180, 0.3);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            z-index: 1001;
+        }
+
+        .start-button:hover { 
+            transform: translateY(-8px) scale(1.05); 
+            box-shadow: 0 15px 50px rgba(255, 20, 147, 0.6);
+        }
+
+        @keyframes glow-pulse {
+            from { text-shadow: 0 0 20px rgba(255, 192, 203, 0.8), 0 0 40px rgba(255, 105, 180, 0.5); }
+            to { text-shadow: 0 0 30px rgba(255, 240, 245, 1), 0 0 50px rgba(255, 20, 147, 0.8); }
+        }
+
+        @keyframes float-title {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* --- AMBIENTE NOCTURNO --- */
+        .night {
+            position: fixed;
+            left: 50%;
+            top: 0;
+            transform: translateX(-50%);
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .moon {
+            position: absolute;
+            top: 10%;
+            left: 15%;
+            width: 70px;
+            height: 70px;
+            background: #E6E6FA;
+            border-radius: 50%;
+            box-shadow: 0 0 40px #FFF, 0 0 80px #ADD8E6;
+        }
+
+        .stars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .star {
+            position: absolute;
+            background: #ffffff;
+            border-radius: 50%;
+            animation: twinkle 2s infinite;
+        }
+
+        /* --- ESTRUCTURA DE LA FLOR (LILIUM) --- */
+        .flowers {
+            position: relative;
+            transform: scale(0.9); /* Escala general aumentada ligeramente */
+            z-index: 2;
+            left: 5em; /* Ajuste para centrar mejor con el nuevo tamaño */
+        }
+
+        .flower {
+            position: absolute;
+            bottom: 10vmin;
+            transform-origin: bottom center;
+            z-index: 50;
+        }
+
+        .flower__leafs {
+            position: relative;
+            animation: blooming-flower 2s backwards;
+        }
+
+        .contenedor-flor {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            /* Animación de "respiración" para dar vida */
+            animation: breathing 6s ease-in-out infinite, resplandor 3s ease-in-out infinite;
+        }
+
+        @keyframes breathing {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); } /* Expansión sutil */
+        }
+
+        @keyframes resplandor {
+            0%, 100% { filter: drop-shadow(0 0 15px rgba(255, 105, 180, 0.3)); }
+            50% { filter: drop-shadow(0 0 35px rgba(255, 20, 147, 0.6)); }
+        }
+
+        .flor {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }/* --- PÉTALOS DE LILIUM --- */
+        /* Más grandes, forma alargada y colores rosados */
+        .petalo {
+            position: absolute;
+            width: 85px; /* Más ancho para presencia */
+            height: 160px; /* Más largo para elegancia */
+            top: 50%;
+            left: 50%;
+            transform-origin: center bottom;
+            z-index: 2;
+        }
+
+        .petalo::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            /* Gradiente complejo para simular la textura del Lilium */
+            background: linear-gradient(
+                to top,
+                #6a0dad 0%,      /* Base oscura/morada */
+                #c71585 20%,     /* Fucsia intenso */
+                #ff69b4 50%,     /* Rosa vibrante */
+                #ffb7c5 80%,     /* Rosa pastel */
+                #fff0f5 100%     /* Punta casi blanca */
+            );
+            /* Forma de hoja/pétalo de lirio: base estrecha, medio ancho, punta afilada */
+            border-radius: 50% 50% 20% 20% / 80% 80% 20% 20%;
+            box-shadow: 
+                inset 0 0 20px rgba(139, 0, 139, 0.5),
+                0 0 10px rgba(255, 182, 193, 0.3);
+        }
+
+        /* Nervadura central del pétalo */
+        .petalo::after {
+            content: '';
+            position: absolute;
+            width: 2px;
+            height: 90%;
+            left: 50%;
+            top: 5%;
+            background: linear-gradient(
+                to bottom,
+                rgba(255, 255, 255, 0.8) 0%,
+                rgba(219, 112, 147, 0.4) 60%,
+                rgba(128, 0, 128, 0.0) 100%
+            );
+            transform: translateX(-50%);
+            filter: blur(1px);
+        }
+
+        /* Rotación de pétalos para formar el Lilium de 6 puntas */
+        .petalo:nth-child(1) { transform: translate(-50%, -100%) rotate(0deg) rotateX(20deg); }
+        .petalo:nth-child(2) { transform: translate(-50%, -100%) rotate(60deg) rotateX(20deg); }
+        .petalo:nth-child(3) { transform: translate(-50%, -100%) rotate(120deg) rotateX(20deg); }
+        .petalo:nth-child(4) { transform: translate(-50%, -100%) rotate(180deg) rotateX(20deg); }
+        .petalo:nth-child(5) { transform: translate(-50%, -100%) rotate(240deg) rotateX(20deg); }
+        .petalo:nth-child(6) { transform: translate(-50%, -100%) rotate(300deg) rotateX(20deg); }
+
+        /* Las venas (detalles sutiles en el pétalo) */
+        .venas {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0.4;
+        }
+
+        .vena {
+            position: absolute;
+            width: 1px;
+            height: 60%;
+            left: 50%;
+            bottom: 10%;
+            background: rgba(139, 0, 139, 0.4);
+            transform-origin: bottom center;
+        }
+        .vena:nth-child(1) { transform: translateX(-50%) rotate(-10deg); height: 50%; }
+        .vena:nth-child(2) { transform: translateX(-50%) rotate(10deg); height: 50%; }
+
+        /* --- CENTRO Y PISTILOS --- */
+        .centro {
+            position: absolute;
+            width: 4vmin;
+            height: 4vmin;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(circle, #3e1e04 0%, #2a1002 100%); /* Centro oscuro */
+            border-radius: 50%;
+            z-index: 10;
+        }
+
+        .pistilo {
+            position: absolute;
+            width: 3px; /* Más grueso */
+            height: 50px; /* Más largo y visible (sobresale) */
+            background: linear-gradient(to top, #800000, #ffffe0); /* Tallo oscuro a punta clara */
+            top: 50%;
+            left: 50%;
+            transform-origin: bottom center;
+            border-radius: 5px;
+        }/* Las anteras (puntas de los pistilos) */
+        .pistilo::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translate(-50%, -40%);
+            width: 8px;
+            height: 12px;
+            background-color: #d2691e; /* Color polen/naranja óxido */
+            border-radius: 4px;
+            box-shadow: 0 0 5px rgba(210, 105, 30, 0.8);
+        }
+
+        .pistilo:nth-child(1) { transform: translate(-50%, -50%) rotate(-25deg); }
+        .pistilo:nth-child(2) { transform: translate(-50%, -50%) rotate(-10deg) scaleY(1.1); }
+        .pistilo:nth-child(3) { transform: translate(-50%, -50%) rotate(10deg) scaleY(1.1); }
+        .pistilo:nth-child(4) { transform: translate(-50%, -50%) rotate(25deg); }
+
+        .brillo-central {
+            position: absolute;
+            width: 30vmin; /* Brillo más grande */
+            height: 30vmin;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(
+                circle,
+                rgba(255, 105, 180, 0.2) 0%,
+                rgba(255, 192, 203, 0.1) 40%,
+                transparent 70%
+            );
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        /* --- TALLOS Y HOJAS --- */
+        .flower__line {
+            height: 60vmin; /* Tallos un poco más altos para sostener las flores grandes */
+            width: 2vmin;
+            background-image: linear-gradient(to left, rgba(0,0,0,0.2), transparent, rgba(255,255,255,0.1)),
+                              linear-gradient(to top, transparent 10%, #1a3c0e, #2d5a16, #4a7c23);
+        }
+
+        .flower__line__leaf {
+            background-image: linear-gradient(to top, rgba(26, 60, 14, 0.8), #2d5a16, #4a7c23);
+        }
+
+        /* --- POSICIONES DE LAS FLORES (Sin cambios drásticos, solo ajustes) --- */
+        .flower--1 { left: 10%; animation: moving-flower-1 4s linear infinite; }
+        .flower--2 { left: 40%; transform: rotate(20deg); animation: moving-flower-2 4s linear infinite; }
+        .flower--3 { left: 75%; transform: rotate(-15deg); animation: moving-flower-3 4s linear infinite; }
+        /* Las flores traseras */
+        .flower--4 { left: -20%; bottom: 18vmin; z-index: -6; transform: rotate(10deg) scale(0.9); }
+        .flower--5 { left: 105%; bottom: 15vmin; z-index: -7; transform: rotate(-25deg) scale(0.8); }
+        .flower--6 { left: -45%; bottom: 20vmin; z-index: -9; transform: rotate(15deg) scale(0.95); }
+        .flower--7 { left: 80%; z-index: -9; transform: rotate(-10deg); }
+
+        /* Animaciones de movimiento suave */
+        @keyframes moving-flower-1 { 0%, 100% { transform: rotate(2deg); } 50% { transform: rotate(-2deg); } }
+        @keyframes moving-flower-2 { 0%, 100% { transform: rotate(18deg); } 50% { transform: rotate(14deg); } }
+        @keyframes moving-flower-3 { 0%, 100% { transform: rotate(-18deg); } 50% { transform: rotate(-20deg) rotateY(-10deg); } }
+
+        /* --- TEXTO Y MENSAJES --- */
+        .message-container {
+            position: fixed;
+            top: 50%;
+            right: 50%;
+            transform: translate(50%, -50%); /* Centrado o ajustado según preferencia */
+            width: 80%;
+            max-width: 600px;
+            z-index: 10;
+            pointer-events: none; /* Dejar pasar clics */
+            text-align: center; /* Centrar texto del poema */
+        }
+
+        /* Ajuste específico para que el texto no tape las flores principales si se desea a la derecha */
+        @media (min-width: 800px) {
+            .message-container {
+                right: 55%; 
+                transform: translateY(-50%);
+                text-align: left;
+            }
+        }
+        .typewriter {
+            font-size: 1.2rem; /* Texto un poco más grande y legible */
+            color: #fff0f5; /* Blanco rosado */
+            line-height: 1.8;
+            white-space: pre-wrap; /* Permitir saltos de línea naturales */
+            font-family: 'Cormorant Garamond', 'Georgia', serif;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            font-weight: 500;
+        }
+        
+        /* Cursor parpadeante */
+        @keyframes blink-caret { from, to { border-color: transparent } 50% { border-color: white; } }
+
+        /* --- LLUVIA, ESTRELLAS, MARIPOSAS (Mantener intactos estilos base) --- */
+        .rain-container, .stars, .mariposa { pointer-events: none; }
+        
+        /* Estilos de mariposas (Copiar tal cual del original pero asegurando z-index alto) */
+        .stage { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 111; pointer-events: none; }
+        .mariposa { position: absolute; width: 120px; height: 120px; }
+        .mariposa-turn { width: 120px; height: 100px; perspective: 1000px; transform-style: preserve-3d; filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.8)); }
+        .mariposa-flutter { width: 1.5rem; height: 6rem; position: relative; background: url("https://github.com/sibilaherrera1-source/lilium/blob/main/body.png?raw=true"); background-repeat: no-repeat; background-position: center; background-size: contain; transform: rotateX(25deg) rotateY(5deg); }
+        .mariposa-flutter::before, .mariposa-flutter::after { position: absolute; top: 5%; content: ""; height: 100%; width: 130%; background-repeat: no-repeat; background-position: center; background-size: contain; }
+        
+        /* Nota: Estoy usando URLs absolutas para las imágenes de mariposas por si acaso, 
+           si tienes las imágenes locales (body.png, alas1.png, alas2.png), cámbialas de nuevo. */
+        .mariposa:nth-child(1) .mariposa-flutter::before { background-image: url("https://github.com/sibilaherrera1-source/lilium/blob/main/alas2.png?raw=true"); transform-origin: 0% 50%; animation: flutter-r 0.25s infinite ease-out; left: 55%; }
+        .mariposa:nth-child(1) .mariposa-flutter::after { background-image: url("https://github.com/sibilaherrera1-source/lilium/blob/main/alas1.png?raw=true"); transform-origin: 100% 50%; animation: flutter-l 0.25s infinite ease-out; right: 55%; }
+        .mariposa:nth-child(2) .mariposa-flutter::before { background-image: url("https://github.com/sibilaherrera1-source/lilium/blob/main/alas2.png?raw=true"); transform-origin: 0% 50%; animation: flutter-r 0.3s infinite ease-out; left: 55%; }
+        .mariposa:nth-child(2) .mariposa-flutter::after { background-image: url("https://github.com/sibilaherrera1-source/lilium/blob/main/alas1.png?raw=true"); transform-origin: 100% 50%; animation: flutter-l 0.3s infinite ease-out; right: 55%; }
+        .mariposa:nth-child(3) .mariposa-flutter::before { background-image: url("https://github.com/sibilaherrera1-source/lilium/blob/main/alas2.png?raw=true"); transform-origin: 0% 50%; animation: flutter-r 0.28s infinite ease-out; left: 55%; }
+        .mariposa:nth-child(3) .mariposa-flutter::after { background-image: url("https://github.com/sibilaherrera1-source/lilium/blob/main/alas1.png?raw=true"); transform-origin: 100% 50%; animation: flutter-l 0.28s infinite ease-out; right: 55%; }
+
+        /* Animaciones de vuelo (Mantenidas) */
+        @keyframes flutter-r { 0%, 100% { transform: rotateY(0deg); } 50% { transform: rotateY(-45deg); } }
+        @keyframes flutter-l { 0%, 100% { transform: rotateY(0deg); } 50% { transform: rotateY(45deg); } }
+        @keyframes volar-circular { 0% { left: 50%; top: 60%; transform: translate(-50%, -50%) rotate(0deg); } 100% { left: 50%; top: 60%; transform: translate(-50%, -50%) rotate(360deg); } }
+      /* Aplicar animaciones de vuelo a contenedores */
+        .mariposa:nth-child(1) { animation: volar-circular 25s ease-in-out infinite; }
+        .mariposa:nth-child(2) { animation: volar-figura8 30s ease-in-out infinite; }
+        .mariposa:nth-child(3) { animation: volar-zigzag 22s ease-in-out infinite; }
+
+        @keyframes volar-figura8 { 0% { left: 50%; top: 20%; transform: translate(-50%, -50%) rotate(0deg); } 50% { left: 50%; top: 20%; transform: translate(-50%, -50%) rotate(180deg); } 100% { left: 50%; top: 20%; transform: translate(-50%, -50%) rotate(360deg); } }
+        @keyframes volar-zigzag { 0% { left: 20%; top: 50%; transform: rotate(45deg); } 50% { left: 60%; top: 60%; transform: rotate(-45deg); } 100% { left: 20%; top: 50%; transform: rotate(45deg); } }
+
+        /* Estilos auxiliares */
+        .not-loaded * { animation-play-state: paused !important; }
+        #musicButton { position: fixed; bottom: 20px; right: 20px; z-index: 1000; background: rgba(255, 255, 255, 0.2); border: none; border-radius: 50%; width: 50px; height: 50px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; }
+        #musicButton:hover { background: rgba(255, 105, 180, 0.5); transform: scale(1.1); }
+        #musicButton svg { width: 24px; height: 24px; fill: #ffc0cb; }
+        #pauseIcon { display: none; }
+        .raindrop { position: absolute; width: 2px; background: linear-gradient(to bottom, rgba(174, 194, 224, 0) 0%, rgba(255, 255, 255, 0.6) 100%); border-radius: 0 0 50% 50%; opacity: 0.8; animation: fall linear infinite; }
+        @keyframes fall { 0% { transform: translateY(-100vh) rotate(10deg); opacity: 0; } 10% { opacity: 0.8; } 100% { transform: translateY(100vh) rotate(10deg); opacity: 0; } }
+
+    </style>
+</head>
+<body class="not-loaded">
+ <div class="start-screen" id="startScreen">
+    <h1 class="start-title">Para ti ♥️</h1>
+    <button 
